@@ -12,11 +12,13 @@
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     min-width: 320px;
+    overflow-x: hidden;
     background: #05070f;
     color: #f8fafc;
     font-family: "Space Grotesk", sans-serif;
@@ -36,5 +38,26 @@
 
   #root {
     min-height: 100vh;
+  }
+
+  img,
+  svg,
+  canvas {
+    max-width: 100%;
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

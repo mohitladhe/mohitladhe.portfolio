@@ -1,15 +1,14 @@
+import { useEffect, useState } from "react";
 import {
   FiArrowRight,
   FiCode,
   FiCompass,
   FiDatabase,
-  FiDribbble,
   FiGithub,
   FiGrid,
   FiLayers,
   FiLinkedin,
   FiMail,
-  FiMonitor,
   FiSend,
   FiSmartphone,
   FiZap,
@@ -18,9 +17,9 @@ import {
 import Aurora from "./components/reactbits/Aurora";
 import Dock from "./components/reactbits/Dock";
 import Magnet from "./components/reactbits/Magnet";
+import ProfileCard from "./components/reactbits/ProfileCard";
 import SpotlightCard from "./components/reactbits/SpotlightCard";
 import TextType from "./components/reactbits/TextType";
-import ProfileCard from "./components/reactbits/ProfileCard";
 import avatar from "./assets/avatar3.png";
 import iconPattern from "./assets/iconpattern.png";
 
@@ -122,7 +121,7 @@ const stack = [
 
 const sectionClass = "relative py-2 pb-16 md:py-4 md:pb-20";
 const sectionKickerClass =
-  "mb-4 text-[0.72rem] font-bold uppercase tracking-[0.34em] text-[#ffd166]";
+  "mb-4 text-[0.7rem] font-bold uppercase tracking-[0.28em] text-[#ffd166] sm:text-[0.72rem] sm:tracking-[0.34em]";
 const sectionTitleClass =
   "max-w-[12ch] text-[clamp(2rem,4vw,3.8rem)] leading-[0.98] tracking-[-0.04em] sm:max-w-[16ch]";
 const glassPanelClass =
@@ -136,9 +135,50 @@ const ctaPrimaryClass =
 const ctaSecondaryClass =
   "inline-flex w-full items-center justify-center gap-3 rounded-full border border-white/15 bg-white/[0.05] px-6 py-4 text-white backdrop-blur-xl transition duration-200 hover:-translate-y-0.5 sm:w-auto";
 const techPillClass =
-  "inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2.5 text-[0.76rem] uppercase tracking-[0.12em] text-slate-50/70 backdrop-blur-md";
+  "inline-flex min-w-0 items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[0.72rem] uppercase tracking-[0.12em] text-slate-50/70 backdrop-blur-md sm:px-4 sm:py-2.5 sm:text-[0.76rem]";
+
+function useResponsivePreferences() {
+  const [state, setState] = useState({
+    isCompact: false,
+    isTouchDevice: false,
+    prefersReducedMotion: false,
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const compactQuery = window.matchMedia("(max-width: 767px)");
+    const touchQuery = window.matchMedia("(hover: none), (pointer: coarse)");
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const update = () => {
+      setState({
+        isCompact: compactQuery.matches,
+        isTouchDevice: touchQuery.matches,
+        prefersReducedMotion: motionQuery.matches,
+      });
+    };
+
+    update();
+    compactQuery.addEventListener("change", update);
+    touchQuery.addEventListener("change", update);
+    motionQuery.addEventListener("change", update);
+
+    return () => {
+      compactQuery.removeEventListener("change", update);
+      touchQuery.removeEventListener("change", update);
+      motionQuery.removeEventListener("change", update);
+    };
+  }, []);
+
+  return state;
+}
 
 function App() {
+  const { isCompact, isTouchDevice, prefersReducedMotion } =
+    useResponsivePreferences();
+  const usePerformanceMode = isCompact || isTouchDevice || prefersReducedMotion;
+
   const scrollToSection = (id) => {
     document
       .getElementById(id)
@@ -174,37 +214,41 @@ function App() {
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden text-white [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px),radial-gradient(circle_at_top,rgba(255,123,84,0.16),transparent_26%),radial-gradient(circle_at_80%_0%,rgba(52,211,153,0.12),transparent_28%),linear-gradient(180deg,#070b17_0%,#05070f_55%,#04050c_100%)] [background-size:110px_110px,110px_110px,auto,auto,auto]">
-      <div className="pointer-events-none fixed inset-0 opacity-[0.18] mix-blend-soft-light [background-image:radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18)_0_1px,transparent_1px),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.12)_0_1px,transparent_1px),radial-gradient(circle_at_40%_70%,rgba(255,255,255,0.12)_0_1px,transparent_1px)] [background-size:180px_180px]" />
+    <div className="relative min-h-screen overflow-x-hidden text-white [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px),radial-gradient(circle_at_top,rgba(255,123,84,0.16),transparent_26%),radial-gradient(circle_at_80%_0%,rgba(52,211,153,0.12),transparent_28%),linear-gradient(180deg,#070b17_0%,#05070f_55%,#04050c_100%)] [background-size:72px_72px,72px_72px,auto,auto,auto] sm:[background-size:110px_110px,110px_110px,auto,auto,auto]">
+      <div
+        className={`pointer-events-none fixed inset-0 mix-blend-soft-light [background-image:radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.18)_0_1px,transparent_1px),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.12)_0_1px,transparent_1px),radial-gradient(circle_at_40%_70%,rgba(255,255,255,0.12)_0_1px,transparent_1px)] [background-size:180px_180px] ${usePerformanceMode ? "opacity-[0.08]" : "opacity-[0.18]"}`}
+      />
 
       <main className="relative overflow-hidden text-white">
         <section id="home" className="relative isolate">
-          <div className="pointer-events-none absolute inset-x-0 -top-[10%] h-[min(90vh,820px)] opacity-[0.85] saturate-[1.2]">
+          <div className="pointer-events-none absolute inset-x-0 -top-[10%] h-[min(70vh,620px)] opacity-[0.78] saturate-[1.05] sm:h-[min(90vh,820px)] sm:opacity-[0.85] sm:saturate-[1.2]">
             <Aurora
-              amplitude={1.15}
-              blend={0.45}
-              speed={0.8}
+              amplitude={usePerformanceMode ? 0.7 : 1.15}
+              blend={usePerformanceMode ? 0.28 : 0.45}
+              speed={usePerformanceMode ? 0.45 : 0.8}
+              pixelRatio={usePerformanceMode ? 1 : 1.5}
+              disabled={prefersReducedMotion}
               colorStops={["#ff7b54", "#ffd166", "#34d399"]}
             />
           </div>
 
-          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 pb-24 pt-6 sm:px-8 lg:px-10">
+          <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-20 pt-4 sm:px-8 sm:pb-24 sm:pt-6 lg:px-10">
             <header
-              className={`${glassPanelClass} mb-10 flex items-center justify-between rounded-full px-4 py-3 backdrop-blur-xl`}
+              className={`${glassPanelClass} mb-8 flex items-center justify-between gap-3 rounded-[1.75rem] px-3 py-3 backdrop-blur-xl sm:mb-10 sm:rounded-full sm:px-4`}
             >
               <button
                 type="button"
                 onClick={() => scrollToSection("home")}
-                className="flex items-center gap-3 text-left"
+                className="flex min-w-0 items-center gap-3 text-left"
               >
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-sm font-semibold text-white">
                   ML
                 </span>
-                <span>
-                  <span className="block text-sm font-semibold uppercase tracking-[0.24em] text-white/70">
+                <span className="min-w-0">
+                  <span className="block truncate text-[0.72rem] font-semibold uppercase tracking-[0.24em] text-white/70 sm:text-sm">
                     Mohit Ladhe
                   </span>
-                  <span className="block text-xs text-white/50">
+                  <span className="block truncate text-[0.7rem] text-white/50 sm:text-xs">
                     Portfolio concept for Vite + React
                   </span>
                 </span>
@@ -235,17 +279,19 @@ function App() {
               </div>
             </header>
 
-            <div className="grid flex-1 items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="grid flex-1 items-start gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-12">
               <div className="max-w-3xl">
-                <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.08] px-4 py-2 text-xs uppercase tracking-[0.28em] text-white/70 backdrop-blur-md">
+                <div className="mb-5 inline-flex max-w-full items-center gap-3 rounded-full border border-white/15 bg-white/[0.08] px-3 py-2 text-[0.64rem] uppercase tracking-[0.22em] text-white/70 backdrop-blur-md sm:mb-6 sm:px-4 sm:text-xs sm:tracking-[0.28em]">
                   <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.9)]" />
-                  Available for selected freelance builds
+                  <span className="truncate">
+                    Available for selected freelance builds
+                  </span>
                 </div>
 
                 <p className={sectionKickerClass}>Portfolio website concept</p>
-                <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] sm:text-6xl lg:text-7xl">
+                <h1 className="max-w-4xl text-[clamp(3.4rem,14vw,6rem)] font-semibold leading-[0.94] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
                   I design and build
-                  <span className="block font-['Cormorant_Garamond'] text-white/95 italic font-semibold leading-[0.92]">
+                  <span className="block font-['Cormorant_Garamond'] text-white/95 italic font-semibold leading-[0.9]">
                     digital experiences
                   </span>
                   <span className="block bg-linear-to-r from-[#ffd166] via-[#ff7b54] to-[#34d399] bg-clip-text text-transparent">
@@ -253,27 +299,34 @@ function App() {
                   </span>
                 </h1>
 
-                <div className="mt-6 min-h-14 text-xl text-white/[0.85] sm:text-2xl">
+                <div className="mt-5 min-h-12 text-lg text-white/[0.85] sm:mt-6 sm:min-h-14 sm:text-2xl">
                   <TextType
                     as="div"
                     text={roles}
-                    typingSpeed={64}
-                    pauseDuration={1800}
-                    deletingSpeed={30}
+                    typingSpeed={usePerformanceMode ? 42 : 64}
+                    pauseDuration={usePerformanceMode ? 2200 : 1800}
+                    deletingSpeed={usePerformanceMode ? 20 : 30}
+                    loop={!prefersReducedMotion}
+                    showCursor={!prefersReducedMotion}
                     textColors={["#ffd166", "#9ae6b4", "#f9a8d4"]}
                     cursorClassName="text-[#ffd166]"
                   />
                 </div>
 
-                <p className="max-w-2xl text-base leading-8 text-white/[0.66] sm:text-lg">
+                <p className="max-w-2xl text-[0.98rem] leading-8 text-white/[0.66] sm:text-lg">
                   I focus on building real-world applications with clean
                   architecture, reliable backend systems, and practical user
                   functionality. My work involves developing Android apps, APIs,
                   and full stack solutions that solve actual problems.
                 </p>
 
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                  <Magnet padding={140} magnetStrength={4}>
+                <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row sm:flex-wrap">
+                  <Magnet
+                    padding={140}
+                    magnetStrength={4}
+                    disabled={usePerformanceMode}
+                    wrapperClassName="w-full sm:w-auto"
+                  >
                     <button
                       type="button"
                       onClick={() => scrollToSection("projects")}
@@ -284,7 +337,12 @@ function App() {
                     </button>
                   </Magnet>
 
-                  <Magnet padding={120} magnetStrength={5}>
+                  <Magnet
+                    padding={120}
+                    magnetStrength={5}
+                    disabled={usePerformanceMode}
+                    wrapperClassName="w-full sm:w-auto"
+                  >
                     <a
                       href="mailto:mohit@example.com"
                       className={ctaSecondaryClass}
@@ -295,60 +353,21 @@ function App() {
                   </Magnet>
                 </div>
 
-                <div className="mt-10 flex flex-wrap gap-3">
+                <div className="mt-8 flex flex-wrap gap-2.5 sm:mt-10 sm:gap-3">
                   {stack.map((item) => (
-                    <span key={item} className={techPillClass}>
+                    <span
+                      key={item}
+                      className={`${techPillClass} max-w-full whitespace-normal break-words`}
+                    >
                       {item}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="relative flex items-start justify-center lg:self-start lg:justify-end">
-                <div className="absolute inset-x-8 top-10 h-40 rounded-full bg-[#ff7b54]/25 blur-3xl lg:left-24 lg:right-0 lg:top-[-1.5rem]" />
-                {/* <PixelCard
-                  variant="pink"
-                  gap={7}
-                  speed={55}
-                  className="h-[420px] w-full max-w-[360px] bg-slate-950/50 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-sm"
-                >
-                  <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-7">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.3em] text-white/[0.45]">Featured profile</p>
-                        <h2 className="mt-3 text-3xl font-semibold text-white">Mohit</h2>
-                        <p className="mt-1 text-sm text-white/60">Front-end engineer focused on premium web craft</p>
-                      </div>
-                      <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-200">
-                        Shipping now
-                      </span>
-                    </div>
-
-                    <div className="rounded-[28px] border border-white/10 bg-black/40 p-5 backdrop-blur-xl">
-                      <div className="flex items-center gap-4">
-                        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-[#ff7b54] via-[#ffd166] to-[#34d399] text-lg font-bold text-slate-950">
-                          MK
-                        </div>
-                        <div>
-                          <p className="text-lg font-semibold text-white">Interactive Portfolio System</p>
-                          <p className="text-sm text-white/[0.55]">React Bits, Tailwind, Vite, motion, responsive layout</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-                        <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
-                          <p className="text-white/[0.4]">Specialty</p>
-                          <p className="mt-2 font-medium text-white">Immersive UI</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/8 bg-white/5 p-4">
-                          <p className="text-white/[0.4]">Focus</p>
-                          <p className="mt-2 font-medium text-white">Performance</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </PixelCard> */}
-                <div className="relative z-10 w-full max-w-[420px] lg:-mt-0 lg:translate-x-10 xl:-mt-0 xl:translate-x-14">
+              <div className="relative order-first flex items-start justify-center lg:order-none lg:self-start lg:justify-end">
+                <div className="absolute inset-x-10 top-8 h-28 rounded-full bg-[#ff7b54]/20 blur-3xl sm:h-40 sm:bg-[#ff7b54]/25 lg:left-24 lg:right-0 lg:top-[-1.5rem]" />
+                <div className="relative z-10 w-full max-w-[360px] sm:max-w-[400px] lg:max-w-[420px] lg:translate-x-10 xl:translate-x-14">
                   <ProfileCard
                     name="Mohit Ladhe"
                     title="Full Stack & Android Developer"
@@ -357,12 +376,13 @@ function App() {
                     contactText="Contact Me"
                     avatarUrl={avatar}
                     showUserInfo={false}
-                    enableTilt={true}
-                    enableMobileTilt
+                    enableTilt={!usePerformanceMode}
+                    enableMobileTilt={!usePerformanceMode}
+                    staticMode={usePerformanceMode}
                     onContactClick={() => console.log("Contact clicked")}
                     behindGlowColor="rgba(125, 190, 255, 0.67)"
                     iconUrl={iconPattern}
-                    behindGlowEnabled
+                    behindGlowEnabled={!usePerformanceMode}
                     innerGradient="linear-gradient(145deg,#1D20218c 0%,#e3731744 100%)"
                   />
                 </div>
@@ -372,12 +392,13 @@ function App() {
         </section>
 
         <section className={sectionClass}>
-          <div className="mx-auto grid max-w-7xl gap-4 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-10">
+          <div className="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-10">
             {stats.map((item) => (
               <SpotlightCard
                 key={item.label}
-                className={`${glassPanelClass} min-h-[170px] border-white/8 bg-white/[0.04] p-6`}
+                className={`${glassPanelClass} min-h-[150px] border-white/8 bg-white/[0.04] p-5 sm:min-h-[170px] sm:p-6`}
                 spotlightColor="rgba(255, 209, 102, 0.18)"
+                disabled={usePerformanceMode}
               >
                 <p className="text-4xl font-semibold text-white">
                   {item.value}
@@ -391,7 +412,7 @@ function App() {
         </section>
 
         <section id="projects" className={sectionClass}>
-          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-10">
             <div className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className={sectionKickerClass}>Selected work</p>
@@ -400,9 +421,9 @@ function App() {
                 </h2>
               </div>
               <p className="mt-6 max-w-xl text-base leading-8 text-white/60">
-                I work on developing complete solutions — from backend APIs to
-                frontend interfaces — with emphasis on performance, structure,
-                and real-world usability.
+                I work on developing complete solutions from backend APIs to
+                frontend interfaces with emphasis on performance, structure, and
+                real-world usability.
               </p>
             </div>
 
@@ -410,12 +431,13 @@ function App() {
               {projects.map((project, index) => (
                 <SpotlightCard
                   key={project.title}
-                  className={`${cardPanelClass} min-h-[320px] border-white/8 bg-white/[0.04] p-7`}
+                  className={`${cardPanelClass} min-h-[300px] border-white/8 bg-white/[0.04] p-5 sm:min-h-[320px] sm:p-7`}
                   spotlightColor={
                     index === 1
                       ? "rgba(52, 211, 153, 0.20)"
                       : "rgba(255, 123, 84, 0.20)"
                   }
+                  disabled={usePerformanceMode}
                 >
                   <div className="relative z-10 flex h-full flex-col">
                     <div className="mb-5 flex items-center justify-between">
@@ -467,7 +489,7 @@ function App() {
         </section>
 
         <section id="services" className={sectionClass}>
-          <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10">
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-10">
             <div>
               <p className={sectionKickerClass}>What I bring</p>
               <h2 className={sectionTitleClass}>
@@ -479,39 +501,19 @@ function App() {
                 and you already have a polished personal brand site ready to
                 customize.
               </p>
-
-              {/* <div className="mt-8 flex flex-wrap gap-3">
-                <a
-                  href="https://github.com/DavidHDev/react-bits"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={ctaSecondaryClass}
-                >
-                  React Bits repo
-                  <FiGithub />
-                </a>
-                <a
-                  href="https://reactbits.dev/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={ctaSecondaryClass}
-                >
-                  React Bits docs
-                  <FiDribbble />
-                </a>
-              </div> */}
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
               {capabilities.map((item, index) => (
                 <SpotlightCard
                   key={item.title}
-                  className={`${glassPanelClass} min-h-[230px] border-white/8 bg-white/[0.04] p-6`}
+                  className={`${glassPanelClass} min-h-[220px] border-white/8 bg-white/[0.04] p-5 sm:min-h-[230px] sm:p-6`}
                   spotlightColor={
                     index % 2 === 0
                       ? "rgba(255, 123, 84, 0.20)"
                       : "rgba(52, 211, 153, 0.18)"
                   }
+                  disabled={usePerformanceMode}
                 >
                   <div className="relative z-10">
                     <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] text-white">
@@ -531,7 +533,7 @@ function App() {
         </section>
 
         <section id="process" className={sectionClass}>
-          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-10">
             <div className="mb-10">
               <p className={sectionKickerClass}>Build rhythm</p>
               <h2 className={sectionTitleClass}>
@@ -544,7 +546,7 @@ function App() {
               {workflow.map((item) => (
                 <div
                   key={item.step}
-                  className={`${cardPanelClass} min-h-[260px] rounded-[1.75rem] p-8`}
+                  className={`${cardPanelClass} min-h-[240px] rounded-[1.75rem] p-6 sm:min-h-[260px] sm:p-8`}
                 >
                   <p className="text-sm font-medium tracking-[0.25em] text-[#ffd166]">
                     {item.step}
@@ -562,7 +564,7 @@ function App() {
         </section>
 
         <section id="contact" className={`${sectionClass} pb-28`}>
-          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8 lg:px-10">
             <div
               className={`${cardPanelClass} rounded-[2rem] p-[clamp(1.6rem,4vw,3rem)]`}
             >
@@ -578,7 +580,12 @@ function App() {
               </div>
 
               <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
-                <Magnet padding={140} magnetStrength={4}>
+                <Magnet
+                  padding={140}
+                  magnetStrength={4}
+                  disabled={usePerformanceMode}
+                  wrapperClassName="w-full sm:w-auto"
+                >
                   <a
                     href="mailto:mohit@example.com"
                     className={ctaPrimaryClass}
@@ -606,15 +613,6 @@ function App() {
                   LinkedIn
                   <FiLinkedin />
                 </a>
-                {/* <a
-                  href="https://dribbble.com/mohitladhe"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={ctaSecondaryClass}
-                >
-                  Dribbble
-                  <FiMonitor />
-                </a> */}
               </div>
             </div>
           </div>

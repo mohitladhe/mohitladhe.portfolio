@@ -108,13 +108,21 @@ void main() {
 `;
 
 export default function Aurora(props) {
-  const { colorStops = ['#5227ff', '#7cff67', '#5227ff'], amplitude = 1.0, blend = 0.5 } = props;
+  const {
+    colorStops = ['#5227ff', '#7cff67', '#5227ff'],
+    amplitude = 1.0,
+    blend = 0.5,
+    disabled = false,
+    pixelRatio = 1.5
+  } = props;
   const propsRef = useRef(props);
   propsRef.current = props;
 
   const ctnDom = useRef(null);
 
   useEffect(() => {
+    if (disabled) return undefined;
+
     const ctn = ctnDom.current;
     if (!ctn) return undefined;
 
@@ -123,6 +131,7 @@ export default function Aurora(props) {
       premultipliedAlpha: true,
       antialias: true
     });
+    renderer.dpr = Math.min(window.devicePixelRatio || 1, pixelRatio);
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
     gl.enable(gl.BLEND);
@@ -198,7 +207,7 @@ export default function Aurora(props) {
 
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [amplitude, blend, colorStops]);
+  }, [amplitude, blend, colorStops, disabled, pixelRatio]);
 
   return <div ref={ctnDom} className="h-full w-full" />;
 }

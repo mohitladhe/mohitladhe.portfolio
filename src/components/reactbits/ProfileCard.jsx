@@ -39,6 +39,7 @@ const ProfileCardComponent = ({
   className = '',
   enableTilt = true,
   enableMobileTilt = false,
+  staticMode = false,
   mobileTiltSensitivity = 5,
   miniAvatarUrl,
   name = 'Javi A. Torres',
@@ -56,7 +57,7 @@ const ProfileCardComponent = ({
   const leaveRafRef = useRef(null);
 
   const tiltEngine = useMemo(() => {
-    if (!enableTilt) return null;
+    if (!enableTilt || staticMode) return null;
 
     let rafId = null;
     let running = false;
@@ -165,7 +166,7 @@ const ProfileCardComponent = ({
         lastTs = 0;
       }
     };
-  }, [enableTilt]);
+  }, [enableTilt, staticMode]);
 
   const getOffsets = (evt, el) => {
     const rect = el.getBoundingClientRect();
@@ -243,7 +244,7 @@ const ProfileCardComponent = ({
   );
 
   useEffect(() => {
-    if (!enableTilt || !tiltEngine) return;
+    if (!enableTilt || staticMode || !tiltEngine) return;
 
     const shell = shellRef.current;
     if (!shell) return;
@@ -295,6 +296,7 @@ const ProfileCardComponent = ({
   }, [
     enableTilt,
     enableMobileTilt,
+    staticMode,
     tiltEngine,
     handlePointerMove,
     handlePointerEnter,
@@ -415,7 +417,7 @@ const ProfileCardComponent = ({
       className={`relative touch-none ${className}`.trim()}
       style={{ perspective: '500px', transform: 'translate3d(0, 0, 0.1px)', ...cardStyle }}
     >
-      {behindGlowEnabled && (
+      {behindGlowEnabled && !staticMode && (
         <div
           className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-200 ease-out"
           style={{
@@ -429,8 +431,8 @@ const ProfileCardComponent = ({
         <section
           className="grid relative overflow-hidden backface-hidden"
           style={{
-            height: '80svh',
-            maxHeight: '540px',
+            height: 'min(80svh, 540px)',
+            minHeight: '420px',
             aspectRatio: '0.718',
             borderRadius: cardRadius,
             backgroundBlendMode: 'color-dodge, normal, normal, normal',
@@ -441,10 +443,12 @@ const ProfileCardComponent = ({
             background: 'rgba(0, 0, 0, 0.9)'
           }}
           onMouseEnter={e => {
+            if (staticMode) return;
             e.currentTarget.style.transition = 'none';
             e.currentTarget.style.transform = 'translateZ(0) rotateX(var(--rotate-y)) rotateY(var(--rotate-x))';
           }}
           onMouseLeave={e => {
+            if (staticMode) return;
             const shell = shellRef.current;
             if (shell?.classList.contains('entering')) {
               e.currentTarget.style.transition = 'transform 180ms ease-out';
@@ -453,9 +457,9 @@ const ProfileCardComponent = ({
             }
             e.currentTarget.style.transform = 'translateZ(0) rotateX(0deg) rotateY(0deg)';
           }}
-        >
-          <div
-            className="absolute inset-0"
+          >
+            <div
+              className="absolute inset-0"
             style={{
               backgroundImage: 'var(--inner-gradient)',
               backgroundColor: 'rgba(0, 0, 0, 0.9)',
@@ -463,12 +467,12 @@ const ProfileCardComponent = ({
               display: 'grid',
               gridArea: '1 / -1'
             }}
-          >
-            {/* Shine layer */}
-            <div style={shineStyle} />
+            >
+              {/* Shine layer */}
+            {!staticMode && <div style={shineStyle} />}
 
             {/* Glare layer */}
-            <div style={glareStyle} />
+            {!staticMode && <div style={glareStyle} />}
 
             {/* Avatar content */}
             <div
@@ -563,7 +567,7 @@ const ProfileCardComponent = ({
                 <h3
                   className="font-semibold m-0"
                   style={{
-                    fontSize: 'min(5svh, 3em)',
+                    fontSize: 'clamp(2.4rem, 7vw, 4.4rem)',
                     backgroundImage: 'linear-gradient(to bottom, #fff, #6f6fbe)',
                     backgroundSize: '1em 1.5em',
                     WebkitTextFillColor: 'transparent',
@@ -578,11 +582,11 @@ const ProfileCardComponent = ({
                   {name}
                 </h3>
                 <p
-                  className="font-semibold whitespace-nowrap mx-auto w-min"
+                  className="font-semibold mx-auto max-w-[85%] text-center"
                   style={{
                     position: 'relative',
                     top: '-12px',
-                    fontSize: '16px',
+                    fontSize: 'clamp(0.95rem, 2.6vw, 1rem)',
                     margin: '0 auto',
                     backgroundImage: 'linear-gradient(to bottom, #fff, #4a4ac0)',
                     backgroundSize: '1em 1.5em',

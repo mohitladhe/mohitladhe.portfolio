@@ -9,7 +9,6 @@ import {
   Children,
   cloneElement,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -113,13 +112,10 @@ export default function Dock({
   magnification = 70,
   distance = 200,
   panelHeight = 64,
-  dockHeight = 256,
   baseItemSize = 50,
 }) {
   const mouseX = useMotionValue(Infinity);
   const isHovered = useMotionValue(0);
-
-  const height = panelHeight;
 
   return (
     <MotionDiv
